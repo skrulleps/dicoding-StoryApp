@@ -17,7 +17,7 @@ export async function subscribeUserToPush() {
     });
   }
 
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('accessToken');
   if (!token) {
     throw new Error('User is not authenticated.');
   }
@@ -66,7 +66,7 @@ export async function unsubscribeUserFromPush() {
     throw new Error('No push subscription found.');
   }
 
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('accessToken');
   if (!token) {
     throw new Error('User is not authenticated.');
   }

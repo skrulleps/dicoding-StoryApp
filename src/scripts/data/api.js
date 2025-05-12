@@ -99,7 +99,7 @@ export async function getStoryDetail({ token, id }) {
 
 export async function subscribeNotification({ subscription }) {
   // subscription is an object with endpoint, keys.p256dh, keys.auth
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('accessToken');
   const body = {
     endpoint: subscription.endpoint,
     keys: {
@@ -120,7 +120,7 @@ export async function subscribeNotification({ subscription }) {
 }
 
 export async function unsubscribeNotification({ subscription }) {
-  const token = localStorage.getItem('token');;
+  const token = localStorage.getItem('accessToken');;
   const body = { 
     endpoint: subscription.endpoint,
   };

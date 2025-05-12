@@ -187,7 +187,7 @@ export default class AddStoryPage {
     }
 
     var photo = photoInput.files[0];
-    var token = localStorage.getItem('token');
+    var token = localStorage.getItem('accessToken');
 
     if (!token) {
       this.showMessage('You must be logged in to add a story.');

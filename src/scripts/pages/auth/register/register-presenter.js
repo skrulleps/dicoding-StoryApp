@@ -14,7 +14,7 @@ class RegisterPresenter {
       } else {
         // Save token to localStorage if available
         if (response.registerResult && response.registerResult.token) {
-          localStorage.setItem('token', response.registerResult.token);
+          localStorage.setItem('accessToken', response.registerResult.token);
           localStorage.setItem('userName', response.registerResult.name);
         }
         this.view.showSuccess();

@@ -8,7 +8,7 @@ class HomePresenter {
   }
 
   async loadStories() {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('accessToken');
     if (!token) {
       this.view.showMessage('Please login to see stories.');
       return;
