@@ -6,6 +6,12 @@ import {
   unsubscribeUserFromPush,
 } from './notifications/notification-manager';
 
+import {
+  generateSubscribeButtonTemplate,
+  generateUnsubscribeButtonTemplate
+} from '../template';
+import { subscribe } from '../utils/notification-helper';
+
 class App {
   #content = null;
   #drawerButton = null;
@@ -118,13 +124,53 @@ class App {
       navList.innerHTML = `
         <li><a href="#/">Beranda</a></li>
         <li><a href="#/about">About</a></li>
+        <li id="subscribe-container"></li>
         <li><a href="#/logout" id="logout-link">Logout</a></li>
       `;
+
+      const subscribeContainer = navList.querySelector('#subscribe-container');
+      const isSubscribed = localStorage.getItem('isSubscribed') === 'true';
+
+      const renderSubscribeButton = () => {
+        subscribeContainer.innerHTML = generateSubscribeButtonTemplate();
+        const subscribeButton = subscribeContainer.querySelector('#subscribe-button');
+        subscribeButton.addEventListener('click', async () => {
+          try {
+            await subscribeUserToPush();
+            localStorage.setItem('isSubscribed', 'true');
+            renderUnsubscribeButton();
+          } catch (error) {
+            console.error('Subscribe failed:', error);
+          }
+        });
+      };
+
+      const renderUnsubscribeButton = () => {
+        subscribeContainer.innerHTML = generateUnsubscribeButtonTemplate();
+        const unsubscribeButton = subscribeContainer.querySelector('#unsubscribe-button');
+        unsubscribeButton.addEventListener('click', async () => {
+          try {
+            await unsubscribeUserFromPush();
+            localStorage.setItem('isSubscribed', 'false');
+            renderSubscribeButton();
+          } catch (error) {
+            console.error('Unsubscribe failed:', error);
+          }
+        });
+      };
+
+      if (isSubscribed) {
+        renderUnsubscribeButton();
+      } else {
+        renderSubscribeButton();
+      }
+
       const logoutLink = navList.querySelector('#logout-link');
       logoutLink.addEventListener('click', (event) => {
         event.preventDefault();
         localStorage.removeItem('token');
         localStorage.removeItem('userName');
+        localStorage.removeItem('isSubscribed');
         this._renderNavbar();
         window.location.hash = '#/login';
       });

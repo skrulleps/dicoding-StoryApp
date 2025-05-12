@@ -27,7 +27,11 @@ export async function loginUser({ email, password }) {
     },
     body: JSON.stringify({ email, password }),
   });
-  return response.json();
+  
+ return {
+    ...json,
+    ok: fetchResponse.ok,
+  };
 }
 
 export async function addNewStory({ token, description, photo, lat, lon }) {
@@ -103,8 +107,8 @@ export async function subscribeNotification({ token, subscription }) {
   const response = await fetch(ENDPOINTS.NOTIFICATIONS_SUBSCRIBE, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(body),
   });

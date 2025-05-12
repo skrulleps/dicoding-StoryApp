@@ -22,11 +22,35 @@ export async function subscribeUserToPush() {
     throw new Error('User is not authenticated.');
   }
 
-  const subscriptionJson = subscription.toJSON();
-  const response = await subscribeNotification({
-    token,
-    subscription: subscriptionJson,
-  });
+  if (!subscription) {
+    console.error('Subscription is null or undefined:', subscription);
+    throw new Error('Push subscription is null.');
+  }
+
+  let subscriptionJson;
+  try {
+    subscriptionJson = subscription.toJSON();
+    console.log('subscriptionJson:', subscriptionJson);
+  } catch (error) {
+    console.error('Error calling subscription.toJSON():', error);
+    throw error;
+  }
+
+  if (!subscriptionJson || !subscriptionJson.endpoint || !subscriptionJson.keys) {
+    console.error('Invalid subscription object:', subscriptionJson);
+    throw new Error('Invalid subscription object.');
+  }
+
+  let response;
+  try {
+    response = await subscribeNotification({
+      endpoint: subscriptionJson.endpoint,
+      keys: subscriptionJson.keys,
+    });
+  } catch (error) {
+    console.error('Error in subscribeNotification:', error);
+    throw error;
+  }
   return response;
 }
 
@@ -49,7 +73,6 @@ export async function unsubscribeUserFromPush() {
 
   const subscriptionJson = subscription.toJSON();
   const response = await unsubscribeNotification({
-    token,
     endpoint: subscriptionJson.endpoint,
   });
 
