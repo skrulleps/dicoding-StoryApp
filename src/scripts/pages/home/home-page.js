@@ -10,11 +10,20 @@ export default class HomePage {
   }
 
   async render() {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      return `
+        <section class="container">
+          <h1>Home Page</h1>
+          <p>Please login to see stories.</p>
+        </section>
+      `;
+    }
     return `
       <section class="container">
         <h1>Home Page</h1>
-        ${token ? '<a href="#/addstory" id="add-story-button" class="add-story-button" title="Add Story">+</a><div id="map-container" style="height: 400px; margin-bottom: 20px;"></div>' : ''}
+        <a href="#/addstory" id="add-story-button" class="add-story-button" title="Add Story">+</a>
+        <div id="map-container" style="height: 400px; margin-bottom: 20px;"></div>
         <div id="loading" class="loading-spinner"></div>
         <div id="stories-container" class="stories-container" style="display:none;"></div>
         ${this.storyDetailPage.render()}
@@ -23,6 +32,10 @@ export default class HomePage {
   }
 
   async afterRender() {
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      return;
+    }
     this.storyDetailPage.afterRender();
     this.showLoading();
 
@@ -36,8 +49,7 @@ export default class HomePage {
       storiesContainer.addEventListener('click', (event) => {
         if (event.target.classList.contains('details-btn')) {
           const storyId = event.target.getAttribute('data-id');
-          const token = localStorage.getItem('token');
-          if (storyId && token) {
+          if (storyId) {
             this.storyDetailPresenter.loadStoryDetail(storyId, token);
             this.storyDetailPage.show();
           }
@@ -45,8 +57,7 @@ export default class HomePage {
       });
     }
 
-    const token = localStorage.getItem('token');
-    if (token && !this.map) {
+    if (!this.map) {
       const Map = (await import('../../utils/maps')).default;
       this.map = new Map('map-container');
       this.map.initMap([0, 0], 2);
@@ -94,7 +105,7 @@ export default class HomePage {
       if (this.map && story.lat && story.lon) {
         const marker = this.map.addMarker([story.lat, story.lon], { title: story.name });
         marker.on('click', () => {
-          const token = localStorage.getItem('token');
+          const token = localStorage.getItem('accessToken');
           if (token) {
             this.storyDetailPresenter.loadStoryDetail(story.id, token);
             this.storyDetailPage.show();

@@ -20,9 +20,19 @@ export async function registerServiceWorker() {
     console.log('Service Worker API unsupported');
     return;
   }
+
+  if (process.env.NODE_ENV === 'development') {
+    // Unregister service workers in development mode to prevent reload loops
+    const registrations = await navigator.serviceWorker.getRegistrations();
+    for (const registration of registrations) {
+      await registration.unregister();
+    }
+    console.log('Service workers unregistered in development mode. (only in dev mode, soalnya hot reload mulu :) aku bingung)');
+    return;
+  }
  
   try {
-    const registration = await navigator.serviceWorker.register('/sw.js');
+    const registration = await navigator.serviceWorker.register('/sw.bundle.js');
     console.log('Service worker telah terpasang', registration);
   } catch (error) {
     console.log('Failed to install service worker:', error);

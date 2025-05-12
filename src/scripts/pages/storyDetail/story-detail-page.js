@@ -13,6 +13,7 @@ class StoryDetailPage {
           <span id="close-modal" class="close-button">&times;</span><br>
           <div id="story-detail-container"></div>
           <div id="story-map" style="height: 300px; margin-top: 10px;"></div>
+          <button id="save-story-button" class="save-story-button">Save Story</button>
         </div>
       </div>
     `;

@@ -2,15 +2,14 @@ import routes from '../routes/routes';
 import { getActiveRoute } from '../routes/url-parser';
 
 import {
-  subscribeUserToPush,
-  unsubscribeUserFromPush,
-} from './notifications/notification-manager';
+  subscribe,
+  unsubscribe,
+} from '../utils/notification-helper';
 
 import {
   generateSubscribeButtonTemplate,
   generateUnsubscribeButtonTemplate
 } from '../template';
-import { subscribe } from '../utils/notification-helper';
 
 class App {
   #content = null;
@@ -26,22 +25,12 @@ class App {
     this._setupDrawer();
     this._renderNavbar();
 
-    this._initPushSubscription();
+   
   }
 
   async _initPushSubscription() {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      return;
-    }
-    try {
-      const permission = await Notification.requestPermission();
-      if (permission === 'granted') {
-        await subscribeUserToPush();
-      }
-    } catch (error) {
-      console.error('Push subscription failed:', error);
-    }
+    // Removed automatic subscription on app init to prevent alert on first render
+    // Subscription will be handled on button click
   }
 
   _setupDrawer() {
@@ -101,6 +90,8 @@ class App {
 
     await page.afterRender();
     this._renderNavbar();
+    this._initPushSubscription();
+
 
     // Remove fade-in class after animation
     this.#content.addEventListener(
@@ -116,7 +107,7 @@ class App {
 
   _renderNavbar() {
     const navList = this.#navigationDrawer.querySelector('#nav-list');
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('accessToken');
     navList.innerHTML = '';
 
     if (token) {
@@ -124,6 +115,7 @@ class App {
       navList.innerHTML = `
         <li><a href="#/">Beranda</a></li>
         <li><a href="#/about">About</a></li>
+        <li><a href="#/savedstory">Saved Story</a></li>
         <li id="subscribe-container"></li>
         <li><a href="#/logout" id="logout-link">Logout</a></li>
       `;
@@ -134,29 +126,35 @@ class App {
       const renderSubscribeButton = () => {
         subscribeContainer.innerHTML = generateSubscribeButtonTemplate();
         const subscribeButton = subscribeContainer.querySelector('#subscribe-button');
-        subscribeButton.addEventListener('click', async () => {
-          try {
-            await subscribeUserToPush();
-            localStorage.setItem('isSubscribed', 'true');
-            renderUnsubscribeButton();
-          } catch (error) {
-            console.error('Subscribe failed:', error);
-          }
-        });
+          subscribeButton.addEventListener('click', async () => {
+            try {
+              const token = localStorage.getItem('accessToken');
+              const success = await subscribe(token);
+              if (success) {
+                localStorage.setItem('isSubscribed', 'true');
+                renderUnsubscribeButton();
+              }
+            } catch (error) {
+              console.error('Subscribe failed:', error);
+            }
+          });
       };
 
       const renderUnsubscribeButton = () => {
         subscribeContainer.innerHTML = generateUnsubscribeButtonTemplate();
         const unsubscribeButton = subscribeContainer.querySelector('#unsubscribe-button');
-        unsubscribeButton.addEventListener('click', async () => {
-          try {
-            await unsubscribeUserFromPush();
-            localStorage.setItem('isSubscribed', 'false');
-            renderSubscribeButton();
-          } catch (error) {
-            console.error('Unsubscribe failed:', error);
-          }
-        });
+          unsubscribeButton.addEventListener('click', async () => {
+            try {
+              const token = localStorage.getItem('accessToken');
+              const success = await unsubscribe(token);
+              if (success) {
+                localStorage.setItem('isSubscribed', 'false');
+                renderSubscribeButton();
+              }
+            } catch (error) {
+              console.error('Unsubscribe failed:', error);
+            }
+          });
       };
 
       if (isSubscribed) {
@@ -168,7 +166,7 @@ class App {
       const logoutLink = navList.querySelector('#logout-link');
       logoutLink.addEventListener('click', (event) => {
         event.preventDefault();
-        localStorage.removeItem('token');
+        localStorage.removeItem('accessToken');
         localStorage.removeItem('userName');
         localStorage.removeItem('isSubscribed');
         this._renderNavbar();

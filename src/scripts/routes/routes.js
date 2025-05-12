@@ -23,6 +23,16 @@ const routes = {
     page.setPresenter(presenter);
     return page;
   },
+  '/savedstory': async () => {
+    const pageModule = await import('../pages/savedStory/saved-story-page.js');
+    const presenterModule = await import('../pages/savedStory/saved-story-presenter.js');
+    const page = new pageModule.default();
+    const presenter = new presenterModule.default(page);
+    page.setPresenter(presenter);
+    await page.afterRender();
+    await presenter.loadSavedStories();
+    return page;
+  },
 };
 
 export default routes;

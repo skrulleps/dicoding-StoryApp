@@ -1,4 +1,5 @@
 import CONFIG from '../config';
+import { getAccessToken } from '../utils/auth';
 
 const ENDPOINTS = {
   REGISTER: `${CONFIG.BASE_URL}/register`,
@@ -27,10 +28,12 @@ export async function loginUser({ email, password }) {
     },
     body: JSON.stringify({ email, password }),
   });
-  
- return {
+
+  const json = await response.json();
+
+  return {
     ...json,
-    ok: fetchResponse.ok,
+    ok: response.ok,
   };
 }
 
@@ -94,8 +97,9 @@ export async function getStoryDetail({ token, id }) {
   return response.json();
 }
 
-export async function subscribeNotification({ token, subscription }) {
+export async function subscribeNotification({ subscription }) {
   // subscription is an object with endpoint, keys.p256dh, keys.auth
+  const token = localStorage.getItem('token');
   const body = {
     endpoint: subscription.endpoint,
     keys: {
@@ -115,8 +119,11 @@ export async function subscribeNotification({ token, subscription }) {
   return response.json();
 }
 
-export async function unsubscribeNotification({ token, endpoint }) {
-  const body = { endpoint };
+export async function unsubscribeNotification({ subscription }) {
+  const token = localStorage.getItem('token');;
+  const body = { 
+    endpoint: subscription.endpoint,
+  };
 
   const response = await fetch(ENDPOINTS.NOTIFICATIONS_SUBSCRIBE, {
     method: 'DELETE',
@@ -126,5 +133,10 @@ export async function unsubscribeNotification({ token, endpoint }) {
     },
     body: JSON.stringify(body),
   });
-  return response.json();
+
+  const json = await response.json();
+  return {
+    ok: response.ok,
+    ...json,
+  };
 }

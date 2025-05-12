@@ -12,9 +12,9 @@ class LoginPresenter {
       if (response.error) {
         this.view.showError(response.message || 'Login failed');
       } else {
-        // Save token to localStorage
+        // Save token to localStorage with key 'accessToken' to match app.js
         if (response.loginResult && response.loginResult.token) {
-          localStorage.setItem('token', response.loginResult.token);
+          localStorage.setItem('accessToken', response.loginResult.token);
           localStorage.setItem('userName', response.loginResult.name);
         }
         this.view.showSuccess();
